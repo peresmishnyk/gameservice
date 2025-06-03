@@ -67,7 +67,16 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 
 # GameService Project
 
-This project is a Laravel application set up to run in a Dockerized environment. It's designed for testing faceted search in various scenarios.
+This project is a Laravel application set up to run in a Dockerized environment. It's designed for testing faceted search in various scenarios, primarily using the `k-samuel/faceted-search` PHP library.
+
+## Core Technology: Faceted Search
+
+The faceted search capabilities of this project are planned to be built around the **`k-samuel/faceted-search`** PHP library.
+
+*   **GitHub Repository:** [https://github.com/k-samuel/faceted-search](https://github.com/k-samuel/faceted-search)
+*   **Purpose:** This library provides a simplified and fast way to implement faceted search functionality without relying on external search servers like Elasticsearch. It's designed to be performant for datasets up to around 500,000 items with multiple properties.
+
+This project will serve as a testing ground and demonstration for integrating and utilizing this library within a Laravel application.
 
 ## Prerequisites
 
