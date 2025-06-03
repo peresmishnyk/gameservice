@@ -64,3 +64,72 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+# GameService Project
+
+This project is a Laravel application set up to run in a Dockerized environment. It's designed for testing faceted search in various scenarios.
+
+## Prerequisites
+
+*   Docker Desktop (or Docker Engine + Docker Compose V2) installed and running.
+*   Git installed.
+*   A terminal or command prompt.
+*   SSH client configured for GitHub access (if cloning via SSH).
+
+## Project Setup
+
+1.  **Clone the Repository:**
+    ```bash
+    git clone git@github.com:peresmishnyk/gameservice.git
+    cd gameservice
+    ```
+
+2.  **Initialize the Project Environment:**
+    This command will build Docker images, start containers, install Laravel, configure environment files, and set up necessary symlinks.
+    ```bash
+    make init
+    ```
+    During this process:
+    *   A new Laravel project is installed.
+    *   `.env.example` is configured for the Docker environment.
+    *   `.env` is created from `.env.example` and `APP_KEY` is generated.
+    *   The `env` symlink (pointing to `.env`) is added to `.gitignore`.
+    *   Symlinks `env` (-> `.env`) and `env-example` (-> `.env.example`) are created in the project root.
+
+3.  **Access the Application:**
+    Once `make init` completes, the application should be accessible at [http://localhost:8000](http://localhost:8000).
+
+## Makefile Commands
+
+This project uses a `Makefile` to simplify common Docker and application tasks. Here are some of the main commands:
+
+*   `make help`: Display a list of all available Makefile targets and their descriptions.
+*   `make init`: (As described above) Initializes the entire project environment. **Run this first after cloning.**
+*   `make up`: Start the Docker containers in detached mode.
+*   `make down`: Stop and remove Docker containers, networks, and volumes.
+*   `make stop`: Stop the Docker containers without removing them.
+*   `make restart`: Restart the Docker containers.
+*   `make build`: Build or rebuild the Docker images (e.g., after `Dockerfile` changes).
+*   `make shell`: Access the `app` container's shell as the application user.
+*   `make root-shell`: Access the `app` container's shell as `root`.
+*   `make artisan ARGS="your-command"`: Run a Laravel Artisan command (e.g., `make artisan ARGS="migrate"`).
+*   `make composer ARGS="your-command"`: Run a Composer command within the `app` container (e.g., `make composer ARGS="require new/package"`).
+*   `make install`: A convenience command that runs `composer install` and then `npm install && npm run build` inside the `app` container.
+*   `make fresh-db`: Runs `php artisan migrate:fresh` to drop all tables and re-run migrations.
+*   `make seed`: Runs `php artisan db:seed` to populate the database with seed data.
+*   `make logs`: Tail logs from the `app` container.
+*   `make logs-nginx`: Tail logs from the `nginx` container.
+*   `make logs-db`: Tail logs from the `db` container.
+*   `make full-reset`: **(Destructive)** Stops and removes all Docker assets, stashes uncommitted Git changes, resets the Git repository to the last commit, removes all untracked files/directories, and deletes the `env` and `env-example` symlinks. Use with caution.
+
+Refer to `make help` or the `Makefile` itself for the full list and details of all commands.
+
+## Environment Configuration
+
+*   The primary environment configuration is managed through the `.env` file in the project root.
+*   The `make init` command automatically configures the `.env.example` and `.env` files with settings appropriate for the Docker environment (e.g., `DB_HOST=db`, `REDIS_HOST=redis`).
+*   Nginx is configured to serve the application on port `8000` of your host machine.
+
+## Contributing
+
+Details for contributing to this project will be added later.
