@@ -4,7 +4,7 @@ SHELL=/bin/bash
 UID=$(shell id -u)
 GID=$(shell id -g)
 
-.PHONY: help init up down stop restart build ps logs shell artisan composer install fresh-db seed
+.PHONY: help init up down stop restart build ps logs shell artisan composer install fresh-db seed full-reset
 
 help:
 	@echo "Usage: make [target]"
@@ -28,6 +28,7 @@ help:
 	@echo "  install           Run composer install and npm install & build"
 	@echo "  fresh-db          Drop all tables and re-run migrations"
 	@echo "  seed              Run database seeders"
+	@echo "  full-reset        Stop and remove all Docker assets, reset Git repo to last commit, remove untracked files, and remove env symlinks."
 
 init: build up
 	@echo "--------------------------------------------------------------------------"
@@ -151,3 +152,27 @@ fresh-db:
 
 seed:
 	make artisan ARGS="db:seed"
+
+full-reset:
+	@echo "--------------------------------------------------------------------------"
+	@echo "WARNING: This will stop and remove all Docker containers, networks,"
+	@echo "and volumes for this project. It will also reset your Git repository"
+	@echo "to the last commit (discarding local changes to tracked files),"
+	@echo "remove all untracked files/directories, and delete env symlinks."
+	@echo "--------------------------------------------------------------------------"
+	@read -p "Are you sure you want to continue? (yes/no) " -r; \
+	if [[ ! $$REPLY =~ ^[Yy][Ee][Ss]$$ ]]; then \
+		_exit 1; \
+	fi
+	@echo "Proceeding with full reset..."
+	@echo "Stopping and removing Docker assets..."
+	docker compose down -v --remove-orphans
+	@echo "Resetting Git repository to HEAD and cleaning untracked files..."
+	git reset --hard HEAD
+	git clean -fdx
+	@echo "Removing env symlinks..."
+	rm -f env env-example
+	@echo "--------------------------------------------------------------------------"
+	@echo "Full reset complete. Project is now in a clean state."
+	@echo "You can now run 'make init' to set up the project again."
+	@echo "--------------------------------------------------------------------------"
