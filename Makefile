@@ -156,15 +156,27 @@ seed:
 full-reset:
 	@echo "--------------------------------------------------------------------------"
 	@echo "WARNING: This will stop and remove all Docker containers, networks,"
-	@echo "and volumes for this project. It will also reset your Git repository"
-	@echo "to the last commit (discarding local changes to tracked files),"
+	@echo "and volumes for this project. It will also STASH any uncommitted changes,"
+	@echo "reset your Git repository to the last commit (discarding local changes to tracked files),"
 	@echo "remove all untracked files/directories, and delete env symlinks."
 	@echo "--------------------------------------------------------------------------"
 	@read -p "Are you sure you want to continue? (yes/no) " -r; \
 	if [[ ! $$REPLY =~ ^[Yy][Ee][Ss]$$ ]]; then \
-		_exit 1; \
+		echo "Full reset aborted by user."; \
+		exit 1; \
 	fi
 	@echo "Proceeding with full reset..."
+	@echo "Attempting to stash uncommitted changes..."
+	@BRANCH=$$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown-branch"); \
+	TIMESTAMP=$$(date +'%Y-%m-%d_%H-%M-%S'); \
+	STASH_MESSAGE="Auto-stash by full-reset: branch '$$BRANCH' at $$TIMESTAMP"; \
+	STASH_RESULT=$$(git stash push -u -m "$$STASH_MESSAGE" 2>&1); \
+	if [[ "$$STASH_RESULT" == "No local changes to save" ]]; then \
+		echo "No local changes to stash."; \
+	else \
+		echo "Changes stashed with message: $$STASH_MESSAGE"; \
+		git stash list -n 1; \
+	fi
 	@echo "Stopping and removing Docker assets..."
 	docker compose down -v --remove-orphans
 	@echo "Resetting Git repository to HEAD and cleaning untracked files..."
@@ -174,5 +186,7 @@ full-reset:
 	rm -f env env-example
 	@echo "--------------------------------------------------------------------------"
 	@echo "Full reset complete. Project is now in a clean state."
+	@echo "If changes were stashed, you can inspect them with 'git stash list'"
+	@echo "and apply/pop with 'git stash pop' or 'git stash apply stash@{N}'."
 	@echo "You can now run 'make init' to set up the project again."
 	@echo "--------------------------------------------------------------------------"
