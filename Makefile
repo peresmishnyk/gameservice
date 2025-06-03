@@ -34,12 +34,42 @@ init: build up
 	@echo "Initializing new Laravel project in the current directory..."
 	@echo "This will download Laravel and install it into the current directory."
 	@echo "--------------------------------------------------------------------------"
-	# Create project in a temp directory inside the container, then move contents to /var/www, then update .gitignore
-	docker compose exec app bash -c "composer create-project --prefer-dist laravel/laravel /tmp/laravel-temp && \
-		shopt -s dotglob && mv /tmp/laravel-temp/* /var/www/ && shopt -u dotglob && rm -rf /tmp/laravel-temp && \
-		(echo \"\" && echo \"# Custom symlinks created by Makefile init\" && echo \"/env\") >> /var/www/.gitignore && \
-		echo 'Successfully initialized project and updated .gitignore.' || \
-		echo 'ERROR: Project initialization failed. Check logs above. Common issues: composer failure, move operation failure, or .gitignore update failure.'"
+	# Create project, move files, update .env.example, .env, and .gitignore
+	docker compose exec app bash -c "\
+		composer create-project --prefer-dist laravel/laravel /tmp/laravel-temp && \
+		shopt -s dotglob && mv /tmp/laravel-temp/* /var/www/ && shopt -u dotglob && \
+		 \
+		cd /var/www/ && \
+		 \
+		echo \"Updating .env.example for Docker environment...\" && \
+		sed -i 's/^APP_URL=.*/APP_URL=http:\/\/localhost:8000/' .env.example && \
+		sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env.example && \
+		sed -i 's/^DB_HOST=.*/DB_HOST=db/' .env.example && \
+		sed -i 's/^DB_PORT=.*/DB_PORT=3306/' .env.example && \
+		sed -i 's/^DB_DATABASE=.*/DB_DATABASE=laravel_db/' .env.example && \
+		sed -i 's/^DB_USERNAME=.*/DB_USERNAME=laravel_user/' .env.example && \
+		sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=laravel_password/' .env.example && \
+		sed -i 's/^REDIS_HOST=.*/REDIS_HOST=redis/' .env.example && \
+		sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=null/' .env.example && \
+		sed -i 's/^REDIS_PORT=.*/REDIS_PORT=6379/' .env.example && \
+		 \
+		echo \"Updating .env for Docker environment (APP_KEY should be preserved)...\" && \
+		sed -i 's/^APP_URL=.*/APP_URL=http:\/\/localhost:8000/' .env && \
+		sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env && \
+		sed -i 's/^DB_HOST=.*/DB_HOST=db/' .env && \
+		sed -i 's/^DB_PORT=.*/DB_PORT=3306/' .env && \
+		sed -i 's/^DB_DATABASE=.*/DB_DATABASE=laravel_db/' .env && \
+		sed -i 's/^DB_USERNAME=.*/DB_USERNAME=laravel_user/' .env && \
+		sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=laravel_password/' .env && \
+		sed -i 's/^REDIS_HOST=.*/REDIS_HOST=redis/' .env && \
+		sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=null/' .env && \
+		sed -i 's/^REDIS_PORT=.*/REDIS_PORT=6379/' .env && \
+		 \
+		(echo \"\" && echo \"# Custom symlinks created by Makefile init\" && echo \"/env\") >> .gitignore && \
+		 \
+		rm -rf /tmp/laravel-temp && \
+		echo 'Successfully initialized project, configured .env files, and updated .gitignore.' || \
+		echo 'ERROR: Project initialization failed. Check logs above.'"
 	@echo ""
 	@echo "--------------------------------------------------------------------------"
 	@echo "Laravel project created. .env file and APP_KEY should be auto-generated."
