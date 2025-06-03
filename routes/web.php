@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DemoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +14,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Comment out or remove the default welcome route
+// Route::get('/welcome', function () {
+//     return view('welcome');
+// });
+
+// Route for the faceted search demo page
+Route::get('/', [DemoController::class, 'index']);
